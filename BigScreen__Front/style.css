@@ -1,0 +1,45 @@
+
+    body {
+      background-color: #000;
+      color: #fff;
+    }
+
+    .container {
+      margin-top: 50px;
+      margin-left: 200px;
+      color: white;
+    }
+
+
+    .form-group label {
+      font-weight: bold;
+    }
+
+    .form-check-label {
+      font-weight: normal;
+    }
+
+    .form-control {
+      background-color: #222;
+      color: #fff;
+    }
+
+    .btn-primary {
+      background-color: #f7931e;
+      border-color: #f7931e;
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+      background-color: #f76c00;
+      border-color: #f76c00;
+    }
+
+
+    #responseTables{
+
+        padding-left: 400px;
+
+    }
+
+

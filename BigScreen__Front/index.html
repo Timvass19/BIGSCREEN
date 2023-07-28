@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulaire de Sondage</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.css">
+</head>
+
+<body>
+  <div class="container">
+    <img src="/big-noir.png" alt=""> <br>
+    <h1>Formulaire de Sondage</h1>
+    <form id="surveyForm">
+      <div id="questionsContainer"></div>
+      <button type="submit" class="btn btn-primary">Finaliser</button>
+    </form>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.all.min.js"></script>
+  <script>
+    // Afficher une pop-up de bienvenue au chargement de la page
+    $(document).ready(function() {
+      Swal.fire({
+        icon: 'info',
+        title: 'Bienvenue !',
+        text: 'Merci de participer à notre sondage. Répondez aux questions avec honnêteté et précision.',
+      });
+    });
+
+    // Récupérer les questions via une requête AJAX
+    $.ajax({
+      url: 'http://127.0.0.1:8000/api/questions',
+      method: 'GET',
+      success: function (response) {
+        var questions = response;
+        var questionsContainer = $('#questionsContainer');
+
+        // Parcourir les questions et générer les champs de formulaire correspondants
+        $.each(questions, function (index, question) {
+          var questionHtml = '<div class="form-group">';
+          questionHtml += '<label for="question-' + question.id + '">' + question.title + '</label>';
+
+          // Générer les éléments de formulaire appropriés en fonction du type de question
+          if (question.type === 'A') {
+            // Choix multiple
+            var options = question.options;
+            $.each(options, function (optionIndex, option) {
+              questionHtml += '<div class="form-check">';
+              questionHtml += '<input class="form-check-input" type="radio" name="question-' + question.id + '" id="question-' + question.id + '-' + option.id + '" value="' + option.text + '" required>';
+              questionHtml += '<label class="form-check-label" for="question-' + question.id + '-' + option.id + '">' + option.text + '</label>';
+              questionHtml += '</div>';
+            });
+          } else if (question.type === 'B') {
+            // Champ de texte
+            questionHtml += '<input type="text" class="form-control" name="question-' + question.id + '" id="question-' + question.id + '">';
+          } else if (question.type === 'C') {
+            // Choix numérique
+            questionHtml += '<input type="number" class="form-control" name="question-' + question.id + '" id="question-' + question.id + '" min="1" max="5">';
+          }
+
+          questionHtml += '</div>';
+          questionsContainer.append(questionHtml);
+        });
+      }
+    });
+
+    // Soumettre le formulaire
+    $('#surveyForm').submit(function (e) {
+      e.preventDefault();
+
+      var responses = [];
+      var form = $(this);
+
+      // Récupérer les réponses depuis les champs de formulaire de type A (choix multiple)
+      form.find('input[type="radio"]').each(function () {
+        var questionId = parseInt($(this).attr('name').split('-')[1]);
+
+        if ($(this).is(':checked')) {
+          var answer = $(this).val();
+          var response = {
+            question_id: questionId,
+            answer: answer
+          };
+          responses.push(response);
+        }
+      });
+
+      // Récupérer les réponses depuis les autres types de champs de formulaire (B et C)
+      form.find('input[type="text"], input[type="number"]').each(function () {
+        var questionId = parseInt($(this).attr('name').split('-')[1]);
+        var answer = $(this).val();
+        var response = {
+          question_id: questionId,
+          answer: answer
+        };
+        responses.push(response);
+      });
+
+      // Vérification spécifique pour la question 1 (question_id = 1)
+      var question1Response = responses.find(response => response.question_id === 1);
+      if (!question1Response || (question1Response['answer'] && !validateEmail(question1Response['answer']))) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'La réponse à la première question doit être une adresse email valide.',
+        });
+        return; // Arrêter la soumission du formulaire si l'adresse email est invalide
+      }
+
+      // Envoyer les réponses au serveur via une requête AJAX
+      $.ajax({
+        url: 'http://127.0.0.1:8000/api/reponses',
+        method: 'POST',
+        data: {
+          responses: responses
+        },
+        success: function (response) {
+          // Réponses soumises avec succès
+          var surveyToken = response.survey_token;
+          var reponseUrl = 'reponse.html?token=' + surveyToken;
+
+          // Afficher la pop-up de remerciement personnalisée
+          Swal.fire({
+            icon: 'success',
+            title: 'Merci d\'avoir soumis vos réponses !',
+            html: 'Toute l’équipe de Bigscreen vous remercie pour votre engagement. Grâce à votre investissement, nous vous préparons une application toujours plus facile à utiliser, seul ou en famille.<br><br>Si vous désirez consulter vos réponses ultérieurement, <a href="' + reponseUrl + '">cliquez ici</a>.',
+            showCancelButton: false,
+            confirmButtonText: 'OK',
+            allowOutsideClick: false // Empêcher de cliquer en dehors du popup pour le fermer
+          }).then((result) => {
+            // Rediriger vers la page "reponse"
+            window.location.href = reponseUrl;
+          });
+
+          // Vider les inputs après la soumission du formulaire
+          form.find('input[type="text"], input[type="number"]').val('');
+        },
+        error: function (xhr, status, error) {
+          // Erreur lors de la soumission des réponses
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Erreur lors de la soumission des réponses.'
+          });
+        }
+      });
+    });
+
+    // Fonction pour vérifier si une adresse email est valide
+    function validateEmail(email) {
+      // Expression régulière pour vérifier le format d'une adresse email
+      var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailPattern.test(email);
+    }
+  </script>
+</body>
+
+</html>

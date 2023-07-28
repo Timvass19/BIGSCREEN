@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sondage - Réponses</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <img src="Admin/big-noir.png" alt=""> <br>
+        <h4>Réponses au Sondage</h4>
+        <br>
+        <div id="questionsContainer"></div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Récupérer le jeton de sondage à partir de l'URL
+        var surveyToken = getUrlParameter('token');
+
+        // L'URL pour récupérer les réponses du sondé
+        var apiUrl = 'http://127.0.0.1:8000/api/reponses/' + surveyToken;
+
+        // Fonction pour récupérer les paramètres d'URL
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Fonction pour trier les questions par ordre
+        function sortQuestionsByOrder(questions, order) {
+            return order.map(function (questionId) {
+                return questions.find(function (q) {
+                    return q.id === questionId;
+                });
+            });
+        }
+
+        // Fonction pour afficher les réponses du sondé
+        function showReponses(responses, questions) {
+            var responsesContainer = $('#questionsContainer');
+            var questionOrder = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; // Ordre souhaité des questions
+
+            // Trier les questions dans l'ordre souhaité
+            var sortedQuestions = sortQuestionsByOrder(questions, questionOrder);
+
+            // Parcourir les questions et afficher les réponses
+            sortedQuestions.forEach(function (question) {
+                var response = responses.find(function (r) {
+                    return r.question.id === question.id;
+                });
+
+                var questionHtml = '<div class="form-group">';
+                questionHtml += '<label>' + question.title + '</label>';
+
+                // Générer les éléments de formulaire en fonction du type de question
+                if (question.type === 'A') {
+                    // Question à choix multiple
+                    question.options.forEach(function (option) {
+                        var isChecked = response && response.answer === option.text;
+
+                        questionHtml += '<div class="form-check">';
+                        questionHtml += '<input class="form-check-input" type="radio" name="question-' + question.id + '" id="question-' + question.id + '-' + option.id + '" value="' + option.text + '"';
+                        if (isChecked) {
+                            questionHtml += ' checked';
+                        }
+                        questionHtml += ' disabled>';
+                        questionHtml += '<label class="form-check-label" for="question-' + question.id + '-' + option.id + '">' + option.text + '</label>';
+                        questionHtml += '</div>';
+                    });
+                } else if (question.type === 'B') {
+                    // Champ de texte
+                    questionHtml += '<input type="text" class="form-control" value="' + (response ? response.answer : '') + '" readonly>';
+                } else if (question.type === 'C') {
+                    // Choix numérique
+                    questionHtml += '<input type="number" class="form-control" min="1" max="5" value="' + (response ? response.answer : '') + '" readonly>';
+                }
+
+                questionHtml += '</div>';
+                responsesContainer.append(questionHtml);
+            });
+        }
+
+        // Récupérer les réponses du sondé via une requête AJAX
+        $.ajax({
+            url: apiUrl,
+            method: 'GET',
+            success: function (response) {
+                // Récupérer les questions pour trier les réponses
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/api/questions',
+                    method: 'GET',
+                    success: function (questions) {
+                        showReponses(response, questions);
+                    },
+                    error: function (xhr, status, error) {
+                        // Erreur lors de la récupération des questions
+                        alert('Erreur lors de la récupération des questions.');
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                // Erreur lors de la récupération des réponses
+                alert('Erreur lors de la récupération des réponses.');
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Documentation de l'API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        code {
+            background-color: #f2f2f2;
+            padding: 2px 4px;
+            font-family: monospace;
+        }
+
+        pre {
+            background-color: #f2f2f2;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .endpoint {
+            margin-bottom: 20px;
+        }
+
+        .endpoint h3 {
+            margin-bottom: 5px;
+        }
+
+        .endpoint p {
+            margin-bottom: 10px;
+        }
+
+        .response {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Documentation de l'API</h1>
+
+    <h3>SurveyController@index</h3>
+    <p>Récupère toutes les questions du sondage avec leurs options de réponse (pour les questions de type A).</p>
+    <p>Endpoint: GET /questions</p>
+    <pre><code>GET /questions</code></pre>
+    <pre><code>Exemple de réponse:
+Status: 200 OK
+Content-Type: application/json
+
+[
+  {
+    "id": 1,
+    "title": "Votre adresse mail ?",
+    "type": "B"
+  },
+  {
+    "id": 2,
+    "title": "Votre âge ?",
+    "type": "B"
+  },
+  ...
+]</code></pre>
+
+    <h3>SurveyController@storeReponses</h3>
+    <p>Enregistre les réponses d'un sondé spécifique.</p>
+    <p>Endpoint: POST /reponses</p>
+    <pre><code>POST /reponses</code></pre>
+    <pre><code>Paramètres de la requête:
+{
+  "responses": [
+    {
+      "question_id": 1,
+      "answer": "example_answer_1"
+    },
+    {
+      "question_id": 2,
+      "answer": "example_answer_2"
+    },
+    ...
+  ]
+}</code></pre>
+    <pre><code>Exemple de réponse:
+Status: 200 OK
+Content-Type: application/json
+
+{
+  "survey_token": "example_survey_token"
+}</code></pre>
+
+    <h3>SurveyController@showReponses</h3>
+    <p>Affiche les réponses d'un sondé spécifique.</p>
+    <p>Endpoint: GET /reponses/{surveyToken}</p>
+    <pre><code>GET /reponses/{surveyToken}</code></pre>
+    <pre><code>Exemple de réponse:
+Status: 200 OK
+Content-Type: application/json
+
+[
+  {
+    "question": {
+      "id": 1,
+      "title": "Votre adresse mail ?",
+      "type": "B"
+    },
+    "answer": "example_answer_1"
+  },
+  {
+    "question": {
+      "id": 2,
+      "title": "Votre âge ?",
+      "type": "B"
+    },
+    "answer": "example_answer_2"
+  },
+  ...
+]</code></pre>
+
+    <h3>SurveyController@getAllReponses</h3>
+    <p>Récupère toutes les réponses groupées par sondé avec les questions associées.</p>
+    <p>Endpoint: POST /tableau</p>
+    <pre><code>GET /tableau</code></pre>
+    <pre><code>Exemple de réponse:
+Status: 200 OK
+Content-Type: application/json
+
+{
+  "example_survey_token_1": [
+    {
+      "id": 1,
+      "question_id": 1,
+      "answer": "example_answer_1",
+      "created_at": "2023-07-01T12:34:56.000000Z",
+      "updated_at": "2023-07-01T12:34:56.000000Z"
+    },
+    {
+      "id": 2,
+      "question_id": 2,
+      "answer": "example_answer_2",
+      "created_at": "2023-07-01T12:34:56.000000Z",
+      "updated_at": "2023-07-01T12:34:56.000000Z"
+    },
+    ...
+  ],
+  "example_survey_token_2": [
+    {
+      "id": 3,
+      "question_id": 1,
+      "answer": "example_answer_3",
+      "created_at": "2023-07-01T12:34:56.000000Z",
+      "updated_at": "2023-07-01T12:34:56.000000Z"
+    },
+    ...
+  ],
+  ...
+}</code></pre>
+
+    <h3>SurveyController@getQuestionResponses</h3>
+    <p>Récupère les réponses pour un ensemble spécifique de questions.</p>
+    <p>Endpoint: GET /statistique</p>
+    <pre><code>GET /statistique</code></pre>
+    <pre><code>Exemple de réponse:
+Status: 200 OK
+Content-Type: application/json
+
+{
+  "6": [
+    "example_answer_1",
+    "example_answer_2",
+    ...
+  ],
+  "7": [
+    "example_answer_3",
+    ...
+  ],
+  ...
+}</code></pre>
+
+    <h3>SurveyController@getQualityResponses</h3>
+    <p>Récupère les réponses pour les questions de qualité (questions de type "Qualité").</p>
+    <p>Endpoint: GET /quality-statistique</p>
+    <pre><code>GET /quality-statistique</code></pre>
+    <pre><code>Exemple de réponse:
+Status: 200 OK
+Content-Type: application/json
+
+{
+  "8": {
+    "1": 3,
+    "2": 5,
+    "3": 2,
+    "4": 6,
+    "5": 1
+  },
+  "9": {
+    "1": 1,
+    "2": 5,
+    "3": 2,
+    "4": 7,
+    "5": 4
+  },
+  ...
+}</code></pre>
+
+<h1>Documentation de l'API - AdminController</h1>
+
+    <div class="endpoint">
+        <h3>Front-end</h3>
+        <h4>AdminController@register</h4>
+        <p>Description: Enregistre un nouvel utilisateur administrateur.</p>
+        <p>Endpoint: <code>POST /admin/register</code></p>
+        <p>Paramètres de la requête:</p>
+        <pre>{
+  "name": "string",
+  "email": "email",
+  "password": "string"
+}</pre>
+        <p>Exemple de réponse:</p>
+        <pre>Status: 200 OK
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john@example.com",
+  "is_admin": 1
+}</pre>
+    </div>
+
+    <div class="endpoint">
+        <h4>AdminController@login</h4>
+        <p>Description: Connecte un utilisateur administrateur.</p>
+        <p>Endpoint: <code>POST /admin/login</code></p>
+        <p>Paramètres de la requête:</p>
+        <pre>{
+  "email": "email",
+  "password": "string"
+}</pre>
+        <p>Exemple de réponse:</p>
+        <pre>Status: 200 OK
+Content-Type: application/json
+
+{
+  "token": "example_token",
+  "userId": 1,
+  "message": "Connexion réussie"
+}</pre>
+    </div>
+
+    <div class="endpoint">
+        <h4>AdminController@logout</h4>
+        <p>Description: Déconnecte un utilisateur administrateur.</p>
+        <p>Endpoint: <code>GET /admin/logout/{id}/{token}</code></p>
+        <p>Exemple de réponse:</p>
+        <pre>Status: 200 OK
+Content-Type: application/json
+
+{
+  "message": "Déconnexion réussie"
+}</pre>
+    </div>
+
+    <div class="endpoint">
+        <h4>AdminController@logged</h4>
+        <p>Description: Vérifie si l'utilisateur administrateur est connecté.</p>
+        <p>Endpoint: <code>GET /admin/logged/{token}</code></p>
+        <p>Exemple de réponse:</p>
+        <pre>Status: 200 OK
+Content-Type: application/json
+
+{
+  "message": "Utilisateur connecté"
+}</pre>
+
+
+
+</body>
+</html>

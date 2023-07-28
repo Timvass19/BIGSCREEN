@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="main.js"></script>
+    <script src="logout.js"></script>
+    <title>Bigscreen</title>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="#" class="logo">
+            <img src="big-noir.png" alt="" width="200" height="50">
+        </a>
+        <ul class="side-menu">
+            <li><a href="dashboard.html"><i class='bx bx-analyse'></i>ACCUEIL</a></li>
+            <li><a href="questionnaire.html"><i class='bx bxs-dashboard'></i>QUESTIONNAIRE</a></li>
+            <li class="active"><a href="reponseSondé.html"><i class='bx bx-group'></i>REPONSES</a></li>
+        </ul>
+        <ul class="side-menu">
+            <li>
+                <a href="#" class="logout">
+                    <i class='bx bx-log-out-circle'></i>
+                    DECONNEXION
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- End of Sidebar -->
+
+
+    <div class="container">
+        <h4 class="ml-5">Réponses</h4>
+        <br>
+        <div id="responseTables"  class="ml-5">
+
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Récupérer les questions via une requête AJAX
+        $.ajax({
+            url: 'http://127.0.0.1:8000/api/questions',
+            method: 'GET',
+            success: function (questions) {
+                // Ensuite, faites l'appel AJAX pour récupérer les réponses groupées par sondé
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/api/tableau',
+                    method: 'POST',
+                    success: function (responses) {
+                        var responseTables = $('#responseTables');
+
+                        // Parcourir les réponses pour chaque sondé
+                        $.each(responses, function (sondeId, sondeReponses) {
+                            var responseHtml = '<h3>Sondé ' + sondeId + '</h3>';
+                            responseHtml += '<table class="table">';
+                            responseHtml += '<thead>';
+                            responseHtml += '<tr>';
+                            responseHtml += '<th scope="col">#</th>';
+                            responseHtml += '<th scope="col">Question</th>';
+                            responseHtml += '<th scope="col">Réponse</th>';
+                            responseHtml += '</tr>';
+                            responseHtml += '</thead>';
+                            responseHtml += '<tbody>';
+
+                            // Parcourir les réponses du sondé et ajouter les lignes au tableau
+                            $.each(sondeReponses, function (answerIndex, answer) {
+                                var questionText = getQuestionTextById(questions, answer.question_id);
+                                responseHtml += '<tr>';
+                                responseHtml += '<th scope="row">' + (answerIndex + 1) + '</th>';
+                                responseHtml += '<td>' + questionText + '</td>';
+                                responseHtml += '<td>' + answer.answer + '</td>';
+                                responseHtml += '</tr>';
+                            });
+
+                            responseHtml += '</tbody>';
+                            responseHtml += '</table>';
+
+                            responseTables.append(responseHtml);
+                        });
+                    }
+                });
+            }
+        });
+
+        // Fonction pour récupérer le texte de la question par son ID
+        function getQuestionTextById(questions, questionId) {
+            for (var i = 0; i < questions.length; i++) {
+                if (questions[i].id === questionId) {
+                    return questions[i].title;
+                }
+            }
+            return 'Question non trouvée';
+        }
+    </script>
+
+    <script src="index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="/style.css">
+    <title>Bigscreen</title>
+
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="#" class="logo">
+            <img src="big-noir.png" alt="" width="200" height="50">
+        </a>
+        <ul class="side-menu">
+            <li><a href="dashboard.html"><i class='bx bx-analyse'></i>ACCUEIL</a></li>
+            <li class="active"><a href="#"><i class='bx bxs-dashboard'></i>QUESTIONNAIRE</a></li>
+            <li><a href="reponseSondé.html"><i class='bx bx-group'></i>REPONSES</a></li>
+        </ul>
+        <ul class="side-menu">
+            <li>
+                <a href="#" class="logout">
+                    <i class='bx bx-log-out-circle'></i>
+                    DECONNEXION
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- End of Sidebar -->
+
+    <div class="container" id="qest-cont">
+        <h1 class="ml-5">Questionnaire</h1>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col" class="ml-2">#</th>
+              <th scope="col">Question</th>
+              <th scope="col">Type</th>
+            </tr>
+          </thead>
+          <tbody id="questionTableBody" class="ml-9">
+
+          </tbody>
+        </table>
+      </div>
+
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script>
+        // Récupérer les questions via une requête AJAX
+        $.ajax({
+          url: 'http://127.0.0.1:8000/api/questions',
+          method: 'GET',
+          success: function (response) {
+            var questions = response;
+            var questionTableBody = $('#questionTableBody');
+
+            // Parcourir les questions et ajouter les lignes au tableau
+            $.each(questions, function (index, question) {
+              var questionHtml = '<tr>';
+              questionHtml += '<th scope="row">' + (index + 1) + '</th>';
+              questionHtml += '<td>' + question.title + '</td>';
+              questionHtml += '<td>' + question.type + '</td>';
+              questionHtml += '</tr>';
+
+              questionTableBody.append(questionHtml);
+            });
+          }
+        });
+      </script>
+      <script src="main.js"></script>
+      <script src="logout.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>

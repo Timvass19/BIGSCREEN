@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="main.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <img src="big-noir.png" alt="" width="250" height="100">
+    <div id="message"></div>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Adresse email</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Se connecter</button>
+    </form>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      // Soumettre le formulaire de connexion
+      $('#loginForm').submit(function (e) {
+        e.preventDefault();
+
+        // Récupérer les données du formulaire
+        var email = $('#email').val();
+        var password = $('#password').val();
+
+        // Envoyer la requête AJAX au serveur pour la connexion
+        $.ajax({
+          url: 'http://127.0.0.1:8000/api/user/login', // Mettez l'URL correcte de votre route
+          method: 'POST',
+          data: {
+            email: email,
+            password: password
+          },
+          success: function (response) {
+            if (response.status === 'done') {
+              // Connexion réussie, rediriger vers la page dashboard.html
+              window.localStorage.setItem(tokenName,`${response.userId}_${email}_${response.token}`)
+              window.location.href = 'dashboard.html'; // Mettez le chemin correct de votre page dashboard.html
+            } else {
+              // Erreur de connexion, afficher le message d'erreur
+              $('#message').html('<div class="alert alert-danger">' + response.error + '</div>');
+            }
+          },
+          error: function () {
+            // Erreur lors de la requête AJAX, afficher le message d'erreur
+            $('#message').html('<div class="alert alert-danger">Une erreur est survenue lors de la connexion.</div>');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

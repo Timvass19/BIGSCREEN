@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="main.js"></script>
+    <script src="logout.js"></script>
+    <title>Bigscreen</title>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="#" class="logo">
+            <img src="big-noir.png" alt="" width="200" height="50">
+        </a>
+        <ul class="side-menu">
+            <li class="active"><a href="#"><i class='bx bx-analyse'></i>ACCUEIL</a></li>
+            <li><a href="questionnaire.html"><i class='bx bxs-dashboard'></i>QUESTIONNAIRE</a></li>
+            <li><a href="reponseSondé.html"><i class='bx bx-group'></i>REPONSES</a></li>
+        </ul>
+        <ul class="side-menu">
+            <li>
+                <a href="#" class="logout">
+                    <i class='bx bx-log-out-circle'></i>
+                    DECONNEXION
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- End of Sidebar -->
+
+    <!-- Main Content -->
+    <div class="content">
+
+        <main>
+            <div class="header">
+                <div class="left">
+                    <ul class="breadcrumb">
+                        <li><a href="#">
+                                ACCUEIL
+                            </a></li>
+                        /
+                        <li><a href="#" class="active">STATISTIQUE DU SONDAGE</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="container">
+                <h4>Statistiques </h4>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <canvas id="equipementChart"></canvas>
+                  </div>
+                  <div class="col-md-6">
+                    <canvas id="qualiteChart"></canvas>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <canvas id="question6Chart"></canvas>
+                  </div>
+                  <div class="col-md-6">
+                    <canvas id="question7Chart"></canvas>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <canvas id="question10Chart"></canvas>
+                  </div>
+                  <div class="col-md-6">
+                    <canvas id="qualiteGlobaleChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <script>
+                // Récupérer les réponses des questions 6, 7, 10 et 11 à 15
+                $.when(
+                  $.ajax({ url: 'http://127.0.0.1:8000/api/statistique', method: 'GET' }),
+                  $.ajax({ url: 'http://127.0.0.1:8000/api/quality-statistique', method: 'GET' })
+                ).done(function (questionResponses, qualityResponses) {
+                  var question6Data = formatQuestionResponses(questionResponses[0], 6);
+                  var question7Data = formatQuestionResponses(questionResponses[0], 7);
+                  var question10Data = formatQuestionResponses(questionResponses[0], 10);
+                  var qualityData = formatQualityResponses(qualityResponses[0]);
+
+                  // Créer les graphiques avec les données récupérées
+                  createPieChart('question6Chart', question6Data);
+                  createPieChart('question7Chart', question7Data);
+                  createPieChart('question10Chart', question10Data);
+                  createRadarChart('qualiteGlobaleChart', qualityData);
+                });
+
+                // Fonction pour formater les réponses d'une question spécifique
+                function formatQuestionResponses(responses, questionId) {
+                  if (responses.hasOwnProperty(questionId)) {
+                    var questionResponses = responses[questionId];
+                    var formattedData = {};
+
+                    questionResponses.forEach(function (response) {
+                      if (formattedData.hasOwnProperty(response)) {
+                        formattedData[response]++;
+                      } else {
+                        formattedData[response] = 1;
+                      }
+                    });
+
+                    return formattedData;
+                  }
+
+                  return {};
+                }
+
+                // Fonction pour formater les réponses qualité (questions 11 à 15)
+                function formatQualityResponses(responses) {
+                  var qualityData = {};
+                  responses.forEach(function (response) {
+                    var questionId = response.question_id;
+                    var answer = response.answer;
+
+                    if (!qualityData.hasOwnProperty(questionId)) {
+                      qualityData[questionId] = [];
+                    }
+
+                    qualityData[questionId].push(answer);
+                  });
+
+                  return qualityData;
+                }
+
+                // Fonction pour créer un graphique de type Pie chart
+                function createPieChart(elementId, data) {
+                  var chartData = {
+                    labels: Object.keys(data),
+                    datasets: [{
+                      data: Object.values(data),
+                      backgroundColor: getRandomColors(Object.keys(data).length),
+                      hoverBackgroundColor: getRandomColors(Object.keys(data).length),
+                    }]
+                  };
+
+                  var ctx = document.getElementById(elementId).getContext('2d');
+                  new Chart(ctx, {
+                    type: 'pie',
+                    data: chartData,
+                    options: {
+                      responsive: true,
+                      legend: {
+                        position: 'right'
+                      }
+                    }
+                  });
+                }
+
+                // Fonction pour créer un graphique de type Radar chart
+                function createRadarChart(elementId, data) {
+                  var chartData = {
+                    labels: Object.keys(data),
+                    datasets: []
+                  };
+
+                  var maxValues = [];
+                  Object.values(data).forEach(function (values) {
+                    maxValues.push(Math.max(...values));
+                  });
+
+                  var datasets = Object.entries(data);
+                  datasets.forEach(function (entry, index) {
+                    var questionId = entry[0];
+                    var values = entry[1];
+
+                    chartData.datasets.push({
+                      label: 'Question ' + questionId,
+                      data: values,
+                      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                      borderColor: 'rgba(75, 192, 192, 1)',
+                      pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                      pointBorderColor: '#fff',
+                      pointRadius: 4,
+                      pointHoverRadius: 5,
+                      pointHitRadius: 10,
+                      pointBorderWidth: 2
+                    });
+                  });
+
+                  var ctx = document.getElementById(elementId).getContext('2d');
+                  new Chart(ctx, {
+                    type: 'radar',
+                    data: chartData,
+                    options: {
+                      responsive: true,
+                      scale: {
+                        ticks: {
+                          beginAtZero: true,
+                          max: Math.max(...maxValues) + 1
+                        }
+                      },
+                      legend: {
+                        position: 'bottom'
+                      }
+                    }
+                  });
+                }
+
+                // Fonction pour générer des couleurs aléatoires
+                function getRandomColors(count) {
+                  var colors = [];
+                  for (var i = 0; i < count; i++) {
+                    var color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+                    colors.push(color);
+                  }
+                  return colors;
+                }
+              </script>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <script src="index.js"></script>
+</body>
+
+</html>
