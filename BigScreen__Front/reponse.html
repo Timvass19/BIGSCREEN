@@ -5,6 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sondage - Réponses</title>
+    <script>
+        $(document).ready(function () {
+            // Afficher la boîte modale de remerciement
+            $('#thankYouModal').modal('show');
+        });
+    </script>
+    
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 
@@ -15,7 +22,6 @@
         <br>
         <div id="questionsContainer"></div>
     </div>
-
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -111,6 +117,31 @@
             }
         });
     </script>
+
+    <!-- Boîte modale pour le popup de remerciement -->
+    <div id="thankYouModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Merci de nous avoir accordé de votre temps</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Pour prouver notre gratitude, l'équipe Bigscreen vous offre la possibilité de voir de manière exceptionnelle la maquette 3D de sa prochaine attraction "Mars".</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton surprise -->
+    <div class="container text-center mt-5">
+        <a href="../53335-1334266-3d-avec-webgl/index.html" class="btn btn-primary">Surprise</a>
+    </div>
 </body>
 
 </html>

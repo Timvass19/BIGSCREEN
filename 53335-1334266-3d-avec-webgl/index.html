@@ -1,0 +1,189 @@
+<html>
+	<head>
+		<style>
+		body{
+			padding: 0px;
+			margin: 0px;
+			text-align: center;
+
+		}
+
+
+		</style>
+		<script src="webgl.js"></script>
+	</head>
+	<body OnLoad="Start()">
+		<table>
+			<tr>
+				<td>
+					<canvas id="screen" class="screen" height="900" width="1800"></canvas> <!-- 675 !-->
+				</td>
+				<td valign="top">
+					<code id="console"></code>
+				</td>
+			</tr>
+		</table>
+		<script language="javascript">
+
+
+		//Texture to render ! http://learningwebgl.com/blog/?p=1786
+		var engine = null;
+		function Start(){
+			engine = new WebGL();																	// Declaration de l'objet
+			engine.onerror = function(e){ console.log(e); }											// Ecouteur d'erreur
+			engine.Construct("screen", 24);
+			engine.InitTextureFilter(engine.TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST);					// Selection l'affichage (Lineaire minimap pour gestion de la lumi�re)
+			engine.setAmbiantLighting(0.4, 0.4, 0.4);												// Declare une lumi�re ambiante diffuse
+			engine.setPointLighting('spot1', 5, 3, 5, 0.6, 0.3, 0.3);								// Declare une lumi�re pontuelle
+			engine.setPointLighting('spot2', -5, 3, -5, 0.0, 0.8, 0.0);								// Declare une lumi�re pontuelle
+			engine.setAlphaBending(false);															// Activer l'alphabending
+			engine.CameraLockXRotation(true);														// Bloque la rotation X de la camera entre 0 et PI
+			engine.LoadImage('./textures/background_night.jpg');									// Lance le prechargement de la texture
+			engine.LoadImage('./textures/cylinder_texture.jpg');									// Lance le prechargement de la texture
+			engine.LoadImage('./textures/test.jpg');												// Lance le prechargement de la texture
+			engine.LoadImage('./textures/cube_texture.jpg');										// Lance le prechargement de la texture
+			engine.LoadImage('./textures/sphere_texture.jpg');										// Lance le prechargement de la texture
+			engine.LoadImage('./textures/grass.jpg');
+            engine.LoadImage('./textures/casq.jpg');												// Lance le prechargement de la texture
+
+        					// Fond de scene
+			WaitImagesLoaded();																		// On attend la fin de chargement des texture
+		}
+
+		function WaitImagesLoaded(){
+			if(engine.AllLoadedImages()){
+				// Textures charg�es
+				LoadObjects();
+			} else {
+				// Textures non charg�es
+				setTimeout('WaitImagesLoaded()', 200);
+			}
+		}
+		function LoadObjects(){
+
+            engine.setBackgroundScene('./textures/background_night.jpg');
+
+			engine.AddGroundMatrixTextured('floor1', -20, 0, -20, 2, 2,
+				[
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 2, 3, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 2, 4, 4, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 2, 4, 4, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 2, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+					[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+				],
+			'./textures/grass.jpg'
+			);
+
+			engine.AddPlaneTextured('floor_matrix', 0, 2, 0, 1, './textures/test.jpg', false);
+			engine.AddCylinderTextured('cylinder1', -1, 2, -2, 1, './textures/cylinder_texture.jpg', false);
+			engine.AddSphereTextured('sphere1', -5, 5, 0, 3, './textures/sphere_texture.jpg', false, 15);
+			engine.AddCubeTextured('cube3', 2, 2, 2, 2, './textures/cube_texture.jpg', false);
+            engine.AddCubeTextured('cube2', 0, 4, 0, 2, './textures/casq.jpg', false);
+
+
+			engine.CameraSetPosition(0, 2, -10); 			// Position de la camera
+			engine.Redraw();								// Lance le rendu
+			Loop();											// Lance la boucle principale
+		}
+
+		// Capture des evenement pour le deplacement de la camera
+		var mousedown = false;
+		var mousex = 0;
+		var mousey = 0;
+		var keys_pressed = [];
+		var i = 0;
+		for(i=0; i<256; i++){ keys_pressed[i] = false; }
+		window.onmousedown = function(){ mousedown = true; }
+		window.onmouseup = function(){
+			mousedown = false;
+			mousex = 0;
+			mousey = 0;
+		}
+		window.onmousemove = function(e){
+			if(mousedown){
+				if(mousex!=0 && mousey!=0){
+					var dx = e.clientX-mousex;
+					var dy = e.clientY-mousey;
+					//Rotation de la camera quand clic gauche enfonc�
+					engine.CameraRotateY(dx/200);
+					engine.CameraRotateX(dy/200);
+				}
+				mousex = e.clientX;
+				mousey = e.clientY;
+			}
+		}
+		window.onkeydown = function(e){
+			keys_pressed[e.keyCode] = true;
+		}
+		window.onkeyup = function(e){
+			keys_pressed[e.keyCode] = false;
+		}
+		window.oncontextmenu = function(e){ return false; }
+
+		// Boucle principale
+		function Loop(){
+
+			// Rendu
+			engine.Redraw();
+
+			//Affichage
+			ConsoleClear();
+			var temp = engine.CameraPosition();
+
+			ConsoleWrite('--- FPS ---');
+			ConsoleWrite('FPS: '+engine.FPS()+' / '+engine.ForcedFPS());
+			ConsoleWrite('');
+			ConsoleWrite('--- Camera position ---');
+			ConsoleWrite(' x:'+temp.x);
+			ConsoleWrite(' y:'+temp.y);
+			ConsoleWrite(' z:'+temp.z);
+			ConsoleWrite('');
+			ConsoleWrite('--- Camera angle ---');
+			temp = engine.CameraAngle();
+			ConsoleWrite(' x:'+temp.x);
+			ConsoleWrite(' y:'+temp.y);
+			ConsoleWrite(' z:'+temp.z);
+			ConsoleWrite('');
+
+			if(keys_pressed[82]){ engine.CameraMove(1); }
+			if(keys_pressed[70]){ engine.CameraMove(-1); }
+			if(keys_pressed[68]){ engine.CameraStrafe(-1); }
+			if(keys_pressed[71]){ engine.CameraStrafe(1); }
+			if(keys_pressed[69]){ engine.CameraUp(0.5); }
+			if(keys_pressed[81]){ engine.CameraUp(-0.5) }
+
+			// Boucle en controlant le FPS voulu
+			engine.FPS_Loop('Loop()');
+		}
+
+		function ConsoleWrite(msg){
+			document.getElementById('console').innerHTML += msg + '<br />';
+		}
+		function ConsoleClear(){
+			document.getElementById('console').innerHTML = '';
+		}
+
+
+
+
+		</script>
+	</body>
+</html>
+
+
+

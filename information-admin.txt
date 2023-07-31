@@ -1,0 +1,3 @@
+information admin
+email:tim19@gmail.com
+password: 123456789
